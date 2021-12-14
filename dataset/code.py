@@ -27,7 +27,10 @@ class CodeUtil:
     @staticmethod
     def add_args(parser):
         parser.add_argument(
-            "--num_vocab", type=int, default=5000, help="the number of vocabulary used for sequence prediction (default: 5000)"
+            "--num_vocab",
+            type=int,
+            default=5000,
+            help="the number of vocabulary used for sequence prediction (default: 5000)",
         )
         parser.set_defaults(max_seq_len=5)
 
@@ -38,7 +41,9 @@ class CodeUtil:
         def calc_loss(pred_list, batch, m=1.0):
             loss = 0
             for i in range(len(pred_list)):
-                loss += multicls_criterion(pred_list[i].to(torch.float32), batch.y_arr[:, i])
+                loss += multicls_criterion(
+                    pred_list[i].to(torch.float32), batch.y_arr[:, i]
+                )
             loss = loss / len(pred_list)
             loss /= m
             return loss
@@ -81,26 +86,36 @@ class CodeUtil:
         seq_len_list = np.array([len(seq) for seq in dataset.data.y])
         print(
             "Target seqence less or equal to {} is {}%.".format(
-                args.max_seq_len, np.sum(seq_len_list <= args.max_seq_len) / len(seq_len_list)
+                args.max_seq_len,
+                np.sum(seq_len_list <= args.max_seq_len) / len(seq_len_list),
             )
         )
 
         # building vocabulary for sequence predition. Only use training data.
-        vocab2idx, idx2vocab = get_vocab_mapping([dataset.data.y[i] for i in split_idx["train"]], args.num_vocab)
+        vocab2idx, idx2vocab = get_vocab_mapping(
+            [dataset.data.y[i] for i in split_idx["train"]], args.num_vocab
+        )
 
         self.arr_to_seq = lambda arr: decode_arr_to_seq(arr, idx2vocab)
 
         # set the transform function
         # augment_edge: add next-token edge as well as inverse edges. add edge attributes.
         # encode_y_to_arr: add y_arr to PyG data object, indicating the array representation of a sequence.
-        dataset_transform = [augment_edge, lambda data: encode_y_to_arr(data, vocab2idx, args.max_seq_len)]
+        dataset_transform = [
+            augment_edge,
+            lambda data: encode_y_to_arr(data, vocab2idx, args.max_seq_len),
+        ]
         dataset_eval.transform = transforms.Compose(dataset_transform)
         if dataset.transform is not None:
             dataset_transform.append(dataset.transform)
         dataset.transform = transforms.Compose(dataset_transform)
 
-        nodetypes_mapping = pd.read_csv(os.path.join(dataset.root, "mapping", "typeidx2type.csv.gz"))
-        nodeattributes_mapping = pd.read_csv(os.path.join(dataset.root, "mapping", "attridx2attr.csv.gz"))
+        nodetypes_mapping = pd.read_csv(
+            os.path.join(dataset.root, "mapping", "typeidx2type.csv.gz")
+        )
+        nodeattributes_mapping = pd.read_csv(
+            os.path.join(dataset.root, "mapping", "attridx2attr.csv.gz")
+        )
 
         # Encoding node features into gnn_emb_dim vectors.
         # The following three node features are used.
@@ -122,7 +137,9 @@ class CodeUtil:
             num_nodes = 0.0
             num_graphs = 0
             for data in dataset_eval[split_idx["train"]]:
-                d = degree(data.edge_index[1], num_nodes=data.num_nodes, dtype=torch.long)
+                d = degree(
+                    data.edge_index[1], num_nodes=data.num_nodes, dtype=torch.long
+                )
                 deg += torch.bincount(d, minlength=deg.numel())
                 num_nodes += data.num_nodes
                 num_graphs += 1

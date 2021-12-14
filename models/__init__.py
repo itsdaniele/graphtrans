@@ -4,6 +4,7 @@ from .pna import PNANet
 from .pna_transformer import PNATransformer
 from .transformer import Transformer
 from .transformer_gnn import TransformerGNN
+from .gnn_perceiver import GNNPerceiver
 
 
 def get_model_and_parser(args, parser):
@@ -12,4 +13,12 @@ def get_model_and_parser(args, parser):
     return model_cls
 
 
-MODELS = {"gnn": GNN, "pna": PNANet, "gnn-transformer": GNNTransformer, "transformer": Transformer, "pna-transformer": PNATransformer, "transformer-gnn": TransformerGNN}
+MODELS = {
+    "gnn": GNN,
+    "pna": PNANet,
+    "gnn-transformer": GNNTransformer,
+    "gnn-perceiver": GNNPerceiver,
+    "transformer": Transformer,
+    "pna-transformer": PNATransformer,
+    "transformer-gnn": TransformerGNN,
+}
