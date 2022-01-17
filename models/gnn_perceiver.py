@@ -21,7 +21,7 @@ class GNNPerceiver(BaseModel):
 
     @staticmethod
     def add_args(parser):
-        TransformerNodeEncoder.add_args(parser)
+        PerceiverNodeEncoder.add_args(parser)
         MaskedOnlyTransformerEncoder.add_args(parser)
         group = parser.add_argument_group("GNNTransformer - Training Config")
         group.add_argument("--pos_encoder", default=False, action="store_true")
@@ -92,7 +92,9 @@ class GNNPerceiver(BaseModel):
         self.graph_pred_linear_list = torch.nn.ModuleList()
 
         self.max_seq_len = args.max_seq_len
-        output_dim = args.d_model
+        # output_dim = args.d_model
+
+        output_dim = 256
 
         if args.max_seq_len is None:
             self.graph_pred_linear = torch.nn.Linear(output_dim, self.num_tasks)
@@ -132,7 +134,7 @@ class GNNPerceiver(BaseModel):
             # ).transpose(0, 1)
         if self.num_encoder_layers > 0:
             transformer_out, _ = self.transformer_encoder(
-                transformer_out.transpose(0, 1), src_padding_mask
+                transformer_out, src_padding_mask
             )  # [s, b, h], [b, s]
 
         if self.pooling in ["last", "cls"]:

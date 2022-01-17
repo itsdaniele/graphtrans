@@ -21,6 +21,8 @@ from dataset import DATASET_UTILS
 from models import get_model_and_parser
 from trainers import get_trainer_and_parser
 
+torch.cuda.empty_cache()
+
 wandb.init(project="graph-aug")
 now = datetime.now()
 now = now.strftime("%m_%d-%H_%M_%S")
@@ -132,7 +134,7 @@ def main():
         dataset_ = PygGraphPropPredDataset(
             name=args.dataset, root="./data", transform=data_transform
         )
-        dataset_eval_ = PygGraphPropPredDataset(name=args.dataset, root=args.data_root)
+        dataset_eval_ = PygGraphPropPredDataset(name=args.dataset, root="./data")
         num_tasks, node_encoder_cls, edge_encoder_cls, deg = dataset_util.preprocess(
             dataset_, dataset_eval_, model_cls, args
         )

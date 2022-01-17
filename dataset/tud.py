@@ -44,7 +44,9 @@ class TUUtil:
 
     @staticmethod
     def preprocess(args):
-        dataset = TUDataset(os.path.join(args.data_root, args.dataset), name=args.dataset)
+        dataset = TUDataset(
+            os.path.join(args.data_root, args.dataset), name=args.dataset
+        )
         num_tasks = dataset.num_classes
 
         num_features = dataset.num_features
@@ -52,15 +54,23 @@ class TUUtil:
         num_training = int(len(dataset) * 0.8)
         num_val = int(len(dataset) * 0.1)
         num_test = len(dataset) - (num_training + num_val)
-        training_set, validation_set, test_set = random_split(dataset, [num_training, num_val, num_test])
+        training_set, validation_set, test_set = random_split(
+            dataset, [num_training, num_val, num_test]
+        )
 
         class Dataset(dict):
             pass
 
-        dataset = Dataset({"train": training_set, "valid": validation_set, "test": test_set})
+        dataset = Dataset(
+            {"train": training_set, "valid": validation_set, "test": test_set}
+        )
         dataset.eval_metric = "acc"
         dataset.task_type = "classification"
-        dataset.get_idx_split = lambda: {"train": "train", "valid": "valid", "test": "test"}
+        dataset.get_idx_split = lambda: {
+            "train": "train",
+            "valid": "valid",
+            "test": "test",
+        }
 
         node_encoder_cls = lambda: nn.Linear(num_features, args.gnn_emb_dim)
 

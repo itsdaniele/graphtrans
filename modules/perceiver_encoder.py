@@ -111,7 +111,7 @@ class Attention(nn.Module):
             mask = rearrange(mask, "b ... -> b (...)")
             max_neg_value = -torch.finfo(sim.dtype).max
             mask = repeat(mask, "b j -> (b h) () j", h=h)
-            sim.masked_fill_(~mask, max_neg_value)
+            sim.masked_fill_(mask, max_neg_value)
 
         # attention, what we cannot get enough of
         attn = sim.softmax(dim=-1)
@@ -147,7 +147,7 @@ class PerceiverNodeEncoder(nn.Module):
             "--transformer_norm_input", action="store_true", default=False
         )
 
-        group.add_argument("--latent_dim", type=int, default=8)
+        group.add_argument("--latent_dim", type=int, default=256)
         group.add_argument("--self_per_cross_attn", type=int, default=2)
         group.add_argument("--num_latents", type=int, default=8)
 
@@ -157,7 +157,8 @@ class PerceiverNodeEncoder(nn.Module):
         self.d_model = args.d_model
         self.num_layer = args.num_encoder_layers
         # Creating Transformer Encoder Model
-
+        print(args)
+        print(args.num_encoder_layers)
         self.latents = nn.Parameter(torch.randn(args.num_latents, args.latent_dim))
         get_cross_attn = lambda: PreNorm(
             args.latent_dim,
@@ -217,6 +218,8 @@ class PerceiverNodeEncoder(nn.Module):
                 )
             )
 
+        self.to_out = nn.LayerNorm(args.latent_dim)
+
         self.max_input_len = args.max_input_len
 
         self.norm_input = None
@@ -253,7 +256,7 @@ class PerceiverNodeEncoder(nn.Module):
                 x = self_attn(x) + x
                 x = self_ff(x) + x
 
-        transformer_out = x.permute((1, 0, 2))
+        transformer_out = self.to_out(x).permute((1, 0, 2))
         # (S, B, h_d)
 
         return transformer_out, src_padding_mask

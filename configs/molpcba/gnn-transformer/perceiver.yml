@@ -1,16 +1,14 @@
-dataset: ogbg-code2
+dataset: ogbg-molpcba
 aug: baseline
 model_type: gnn-perceiver
-
-gnn_type: gcn
+gnn_type: gin
 gnn_virtual_node: true
-
 graph_pooling: cls
-
-batch_size: 16
-lr: 0.0001
-
 runs: 1
 seed: 12344
+batch_size: 256
+lr: 0.0001
+start-eval: 1
 
 transformer_norm_input: true
+gnn_dropout: 0.3
